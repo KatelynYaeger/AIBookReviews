@@ -26,47 +26,65 @@ namespace BookReviewsAI.Models
 
             var apiKey = chatSettings.Value.ApiKey;
 
-            Console.WriteLine("Hello there! I'm your friendly pocket Librarian. What book would you like me to talk about today?");
-
-            var userTitle = Console.ReadLine();
+            Console.WriteLine("Hello there! I'm your friendly pocket Librarian.");
 
             var gpt3 = new OpenAIService(new OpenAiOptions()
             {
                 ApiKey = apiKey
             });
 
-            //Create a chat completion request
-            var completionResult = await gpt3.ChatCompletion.CreateCompletion
-                                   (new ChatCompletionCreateRequest()
-                                   {
-                                       Messages = new List<ChatMessage>(new ChatMessage[]
-                                        { new ChatMessage("user", $"Give me an unbiased review for the book {userTitle} in under 200 words" +
-                                        $"and make it sound like a reader wrote it, not a critic") }),
-                                       Model = "gpt-3.5-turbo",
-                                       Temperature = 0.5F,
-                                       MaxTokens = 3,
-                                       N = 3
-                                   }) ;
+            var answer = false;
 
-            // Check if the completion result was successful and handle the response
-            if (completionResult.Successful)
+            while (answer == false)
             {
-                foreach (var choice in completionResult.Choices)
+                Console.WriteLine("What book would you like to hear about?");
+
+                var userTitle = Console.ReadLine();
+
+                //Create a chat completion request
+                var completionResult = await gpt3.ChatCompletion.CreateCompletion
+                                       (new ChatCompletionCreateRequest()
+                                       {
+                                           Messages = new List<ChatMessage>(new ChatMessage[]
+                                            { new ChatMessage("user", $"Give me an unbiased review for the book {userTitle} " +
+                                        $"in under 200 words and make it sound like a reader wrote it, not a critic") }),
+                                           Model = "gpt-3.5-turbo-1106",
+                                           Temperature = 0.5F,
+                                           MaxTokens = 500,
+                                           N = 1
+                                       });
+
+                // Check if the completion result was successful and handle the response
+                if (completionResult.Successful)
                 {
-                    Console.WriteLine(choice.Message.Content);
+                    foreach (var choice in completionResult.Choices)
+                    {
+                        Console.WriteLine(choice.Message.Content);
+                    }
+                }
+                else
+                {
+                    if (completionResult.Error == null)
+                    {
+                        throw new Exception("Unknown Error");
+                    }
+                    Console.WriteLine($"{completionResult.Error.Code}: {completionResult.Error.Message}");
+                }
+
+                Console.WriteLine("Would you like to try a different book? Yes or no");
+
+                var userAnswer = Console.ReadLine();
+
+                if (userAnswer.ToLower() == "yes")
+                {
+                    answer = false;
+                }
+                else
+                {
+                    answer = true;
+                    Console.WriteLine("Goodbye then!");
                 }
             }
-            else
-            {
-                if (completionResult.Error == null)
-                {
-                    throw new Exception("Unknown Error");
-                }
-                Console.WriteLine($"{completionResult.Error.Code}: {completionResult.Error.Message}");
-            }
-
-            Console.ReadLine();
-
         }
     }
 }
