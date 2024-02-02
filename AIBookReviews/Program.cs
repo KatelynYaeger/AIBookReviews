@@ -47,7 +47,7 @@ namespace BookReviewsAI.Models
                                        {
                                            Messages = new List<ChatMessage>(new ChatMessage[]
                                             { new ChatMessage("user", $"Give me an unbiased review for the book {userTitle} " +
-                                        $"in under 200 words and make it sound like a reader wrote it, not a critic") }),
+                                        $"in under 200 words and make it sound like a reader wrote it, not a critic.") }),
                                            Model = "gpt-3.5-turbo-1106",
                                            Temperature = 0.5F,
                                            MaxTokens = 500,
