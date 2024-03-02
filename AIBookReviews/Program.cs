@@ -41,48 +41,59 @@ namespace BookReviewsAI.Models
 
                 var userTitle = Console.ReadLine();
 
-                //Create a chat completion request
-                var completionResult = await gpt3.ChatCompletion.CreateCompletion
-                                       (new ChatCompletionCreateRequest()
-                                       {
-                                           Messages = new List<ChatMessage>(new ChatMessage[]
-                                            { new ChatMessage("user", $"Give me an unbiased review for the book {userTitle} " +
-                                        $"in under 200 words and make it sound like a reader wrote it, not a critic.") }),
-                                           Model = "gpt-3.5-turbo-1106",
-                                           Temperature = 0.5F,
-                                           MaxTokens = 500,
-                                           N = 1
-                                       });
-
-                // Check if the completion result was successful and handle the response
-                if (completionResult.Successful)
+                if (userTitle is null || userTitle.Length == 0)
                 {
-                    foreach (var choice in completionResult.Choices)
-                    {
-                        Console.WriteLine(choice.Message.Content);
-                    }
-                }
-                else
-                {
-                    if (completionResult.Error == null)
-                    {
-                        throw new Exception("Unknown Error");
-                    }
-                    Console.WriteLine($"{completionResult.Error.Code}: {completionResult.Error.Message}");
-                }
-
-                Console.WriteLine("Would you like to try a different book? Yes or no");
-
-                var userAnswer = Console.ReadLine();
-
-                if (userAnswer.ToLower() == "yes")
-                {
+                    Console.WriteLine("I'm sorry, I didn't get that.");
                     answer = false;
                 }
+
                 else
                 {
-                    answer = true;
-                    Console.WriteLine("Goodbye then!");
+
+                    //Create a chat completion request
+                    var completionResult = await gpt3.ChatCompletion.CreateCompletion
+                                           (new ChatCompletionCreateRequest()
+                                           {
+                                               Messages = new List<ChatMessage>(new ChatMessage[]
+                                                { new ChatMessage("user", $"Give me an unbiased review for the book {userTitle} " +
+                                        $"in under 200 words. Use reviews from across the internet to compile this review." +
+                                        $"Mention who the author is and make it sound like a reader wrote it, not a critic.") }),
+                                               Model = "gpt-3.5-turbo-1106",
+                                               Temperature = 0.5F,
+                                               MaxTokens = 500,
+                                               N = 1
+                                           });
+
+                    // Check if the completion result was successful and handle the response
+                    if (completionResult.Successful)
+                    {
+                        foreach (var choice in completionResult.Choices)
+                        {
+                            Console.WriteLine(choice.Message.Content);
+                        }
+                    }
+                    else
+                    {
+                        if (completionResult.Error == null)
+                        {
+                            throw new Exception("Unknown Error");
+                        }
+                        Console.WriteLine($"{completionResult.Error.Code}: {completionResult.Error.Message}");
+                    }
+
+                    Console.WriteLine("Would you like to try a different book? Yes or no");
+
+                    var userAnswer = Console.ReadLine();
+
+                    if (userAnswer.ToLower() == "yes")
+                    {
+                        answer = false;
+                    }
+                    else
+                    {
+                        answer = true;
+                        Console.WriteLine("Goodbye then!");
+                    }
                 }
             }
         }
